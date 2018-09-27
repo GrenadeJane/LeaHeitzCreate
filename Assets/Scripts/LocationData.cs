@@ -20,7 +20,7 @@ public class LocationData
     [SerializeField]
     public OpeningHours opening_hours;
     [SerializeField]
-    public Photos[] photos;
+    public List<Photos> photos;
 }
 [Serializable]
 public class OpeningHours

@@ -1,7 +1,8 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
+using UnityEngine.Events;
+using UnityEngine.UI;
+using System.Linq;
 
 public class GoogleResultsReader : MonoBehaviour
 {
@@ -13,7 +14,10 @@ public class GoogleResultsReader : MonoBehaviour
 
     #endregion
 
+    #region Parameters 
+    [SerializeField] GameObject prefabPhoto;
 
+    #endregion
     public void SearchGoogleApi(string input)
     {
         string googleQuery = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=";
@@ -24,14 +28,33 @@ public class GoogleResultsReader : MonoBehaviour
             "&key=";
         googleQuery += GOOGLE_API_KEY;
 
-        StartCoroutine(CallGoogleApi(googleQuery));
+        StartCoroutine(CallGoogleApi(googleQuery, ReadGoogleResults));
     }
 
 
     public void ReadGoogleResults(string response)
     {
         ResultsGooglePlace res = JsonUtility.FromJson<ResultsGooglePlace>(response);
+        foreach (LocationData location in res.results)
+        {
+            if (location.photos.Count > 0)
+            {
+                ReadPhotos(location.photos.First().photo_reference);
+            }
+        }
         Debug.Log(res);
+    }
+
+    void ReadPhotos(string photoRef)
+    {
+        string query = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + photoRef + "&key=" + GOOGLE_API_KEY;
+        StartCoroutine(CallGoogleApiImage(query, CreatePrefabPhoto));
+    }
+
+    void CreatePrefabPhoto(Texture2D tex)
+    {
+        GameObject obj = Instantiate(prefabPhoto);
+        obj.GetComponent<SpriteRenderer>().sprite = Sprite.Create(tex, new Rect(0,0,200,200),  Vector2.zero);
     }
 
     public string AskNextPage(string idNextRound)
@@ -39,14 +62,21 @@ public class GoogleResultsReader : MonoBehaviour
         return "";
     }
 
-    IEnumerator CallGoogleApi(string googleQuery)
+    IEnumerator CallGoogleApi(string googleQuery, UnityAction<string> actionDone )
     {
         WWW googleResponse = new WWW(googleQuery);
         yield return googleResponse;
         string response = googleResponse.text;
         Debug.Log(response);
 
-        ReadGoogleResults(response);
+        actionDone(response);
     }
 
+    IEnumerator CallGoogleApiImage(string googleQuery, UnityAction<Texture2D> actionDone)
+    {
+        WWW googleResponse = new WWW(googleQuery);
+        yield return googleResponse;
+
+        actionDone(googleResponse.texture);
+    }
 }
