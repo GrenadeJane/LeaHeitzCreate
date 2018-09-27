@@ -117,22 +117,51 @@ public class Carousel : MonoBehaviour {
     /// </summary>
     /// 
     void Start() {
-        foreach (Transform child in transform)
-        {
-            if (child.gameObject.activeSelf)
-                children.Add(child.gameObject);
-        }
+        //foreach (Transform child in transform)
+        //{
+        //    if (child.gameObject.activeSelf)
+        //        children.Add(child.gameObject);
+        //}
 
-         angle = Mathf.PI * 2 / children.Count;
+        // angle = Mathf.PI * 2 / children.Count;
 
-        SetPositions();
-        SetRotations();
+        //SetPositions();
+        //SetRotations();
+
+        //children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
     }
 
 
 
     #endregion
 
+    void Clear()
+    {
+
+    }
+
+
+    public void AddPlace(PlaceContent place)
+    {
+        place.gameObject.transform.parent = this.transform; 
+    }
+
+    [ContextMenu("Displau Photos")]
+    public void DisplayPhotos()
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.gameObject.activeSelf)
+                children.Add(child.gameObject);
+        }
+
+        angle = Mathf.PI * 2 / children.Count;
+
+        SetPositions();
+        SetRotations();
+
+        children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
+    }
     /// <summary>
     /// Set the positions one of the photos
     /// </summary>
@@ -160,8 +189,6 @@ public class Carousel : MonoBehaviour {
 
     void SetRotations()
     {
-      
-
         for (int i = 0; i < children.Count; i++)
         {
             GameObject obj = children[i];
@@ -174,8 +201,10 @@ public class Carousel : MonoBehaviour {
     {
         if (Rotating)
             return;
+        children[currentHightLight].GetComponent<PlaceContent>().SetAsBackgroundPlace();
+        currentHightLight = (currentHightLight == 0) ? children.Count - 1 : currentHightLight - 1;
 
-        currentHightLight = (currentHightLight == 0 ) ? children.Count - 1 : currentHightLight - 1 ;
+        children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
         Rotating = true;
         newAngle = currentAngle - angle;
     }
@@ -185,14 +214,18 @@ public class Carousel : MonoBehaviour {
         if (Rotating)
             return;
 
+        children[currentHightLight].GetComponent<PlaceContent>().SetAsBackgroundPlace();
         currentHightLight = (currentHightLight == children.Count - 1) ? 0 : currentHightLight + 1;
+
         newAngle = currentAngle+ angle;
+
+        children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
 
         Rotating = true;
     }
 
     bool Rotating = false;
-    float currentAngle = -Mathf.PI / 2;
+    float currentAngle = Mathf.PI / 2;
     float newAngle;
     float angle;
 

@@ -1,8 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
-using System.Linq;
 
 public class GoogleResultsReader : MonoBehaviour
 {
@@ -18,6 +18,15 @@ public class GoogleResultsReader : MonoBehaviour
     [SerializeField] GameObject prefabPhoto;
 
     #endregion
+
+    #region Events
+
+    [Serializable] public class UnityEvent_AddPlace : UnityEvent<PlaceContent> { }
+
+    [SerializeField] public UnityEvent_AddPlace AddPlaceToCarousel;
+
+    #endregion
+
     public void SearchGoogleApi(string input)
     {
         string googleQuery = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=";
@@ -47,7 +56,7 @@ public class GoogleResultsReader : MonoBehaviour
 
     void ReadPhotos(string photoRef)
     {
-        string query = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + photoRef + "&key=" + GOOGLE_API_KEY;
+        string query = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=750&photoreference=" + photoRef + "&key=" + GOOGLE_API_KEY;
         StartCoroutine(CallGoogleApiImage(query, CreatePrefabPhoto));
     }
 
@@ -55,6 +64,7 @@ public class GoogleResultsReader : MonoBehaviour
     {
         GameObject obj = Instantiate(prefabPhoto);
         obj.GetComponent<SpriteRenderer>().sprite = Sprite.Create(tex, new Rect(0,0,200,200),  Vector2.zero);
+        AddPlaceToCarousel.Invoke(obj.GetComponent<PlaceContent>());
     }
 
     public string AskNextPage(string idNextRound)
