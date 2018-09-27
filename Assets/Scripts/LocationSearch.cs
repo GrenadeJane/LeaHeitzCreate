@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+
+using System;
 
 public class LocationSearch : MonoBehaviour {
-
-    #region Constants
-    const string GOOGLE_API_KEY = "AIzaSyDxZDslnDL8yKkMv-kPTmgBiwedufQ_uHs";
-
-    #endregion
-
 
     #region Parameters
 
@@ -22,6 +19,14 @@ public class LocationSearch : MonoBehaviour {
 
     #endregion
 
+
+    #region Events
+
+    [Serializable] public class UnityEvent_Search : UnityEvent<string>{}
+
+    [SerializeField] public UnityEvent_Search MakeGoogleResearch; 
+
+    #endregion
     // Use this for initialization
     void Start () {
 		
@@ -35,19 +40,6 @@ public class LocationSearch : MonoBehaviour {
     public void OnLocationSearchPressed()
     {
         string locationSearch = locationInputField.text;
-        string googleQuery = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=";
-        googleQuery += locationSearch;
-        googleQuery += " &inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=";
-        googleQuery += GOOGLE_API_KEY;
-
-        StartCoroutine(CallGoogleApi(googleQuery));
-    }
-
-    IEnumerator CallGoogleApi(string googleQuery )
-    {
-        WWW googleResponse = new WWW(googleQuery);
-        yield return googleResponse;
-        string response = googleResponse.text;
-        Debug.Log(response);
+        MakeGoogleResearch.Invoke(locationSearch);
     }
 }
