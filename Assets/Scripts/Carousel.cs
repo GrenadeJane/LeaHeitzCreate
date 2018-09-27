@@ -65,7 +65,7 @@ public class Carousel : MonoBehaviour {
 
     [SerializeField]
     [Range(1f, 360f)]
-    private  float _modulo;
+    private float _modulo;
     public float Modulo
     {
         get { return _modulo; }
@@ -73,6 +73,16 @@ public class Carousel : MonoBehaviour {
 
     }
 
+
+    [SerializeField]
+    [Range(1f, 360f)]
+    private float _test;
+    public float Test
+    {
+        get { return _test; }
+        set { _test = value; SetRotations(); SetPositions(); }
+
+    }
 
     void OnValidate()
     {
@@ -83,6 +93,7 @@ public class Carousel : MonoBehaviour {
         RotationY = rotationY;
         RotationZ = rotationZ;
         Modulo = _modulo;
+        Test = _test;
     }
 
 
@@ -92,7 +103,7 @@ public class Carousel : MonoBehaviour {
 
 
     List<GameObject> children = new List<GameObject>();
-
+    int currentHightLight = 0;
 
     #endregion
 
@@ -105,12 +116,14 @@ public class Carousel : MonoBehaviour {
     /// Implementation of the Start MonoBehaviour
     /// </summary>
     /// 
-    void Start () {
+    void Start() {
         foreach (Transform child in transform)
         {
             if (child.gameObject.activeSelf)
                 children.Add(child.gameObject);
         }
+
+         angle = Mathf.PI * 2 / children.Count;
 
         SetPositions();
         SetRotations();
@@ -124,23 +137,21 @@ public class Carousel : MonoBehaviour {
     /// Set the positions one of the photos
     /// </summary>
 
-    void SetPositions ()
+    void SetPositions()
     {
-        float angle = Mathf.PI * 2/ children.Count;
-
-        Vector2 DotVectorHeight = new Vector2( Mathf.Cos(_inclinaison ) * _inclinaisonIntensity, Mathf.Sin(_inclinaison) * _inclinaisonIntensity);
+        Vector2 DotVectorHeight = new Vector2(Mathf.Cos(_inclinaison) * _inclinaisonIntensity, Mathf.Sin(_inclinaison) * _inclinaisonIntensity);
         for (int i = 0; i < children.Count; i++)
         {
             GameObject obj = children[i];
 
-            obj.transform.position = new Vector3(Mathf.Cos(angle * i - Mathf.PI / 2) * _spaceX , 0 , Mathf.Sin(angle* i - Mathf.PI / 2 )*SpaceY ) ;
+            obj.transform.position = new Vector3(Mathf.Cos(angle * i - currentAngle) * _spaceX, 0, Mathf.Sin(angle * i - currentAngle) * SpaceY);
 
             float dot = Vector2.Dot(new Vector2(obj.transform.position.z, 0), DotVectorHeight);
             obj.transform.position += new Vector3(0, (DotVectorHeight * dot).y, 0);
 
             obj.transform.position += transform.position;
         }
-	}
+    }
 
 
     /// <summary>
@@ -149,13 +160,56 @@ public class Carousel : MonoBehaviour {
 
     void SetRotations()
     {
-        float angle = Mathf.PI * 2 / children.Count;
+      
 
         for (int i = 0; i < children.Count; i++)
         {
             GameObject obj = children[i];
-            float cos = Mathf.Cos(angle * i - Mathf.PI / 2);
-            obj.transform.rotation = Quaternion.Euler(new Vector3(0, rotationY * Math.Sign(cos), rotationZ  * cos));
+            float cos = Mathf.Cos(angle * i - currentAngle);
+            obj.transform.rotation = Quaternion.Euler(new Vector3(0, rotationY * Math.Sign(cos), rotationZ * cos));
+        }
+    }
+
+    public void OnLeftTurn()
+    {
+        if (Rotating)
+            return;
+
+        currentHightLight = (currentHightLight == 0 ) ? children.Count - 1 : currentHightLight - 1 ;
+        Rotating = true;
+        newAngle = currentAngle - angle;
+    }
+
+    public void OnRightTurn()
+    {
+        if (Rotating)
+            return;
+
+        currentHightLight = (currentHightLight == children.Count - 1) ? 0 : currentHightLight + 1;
+        newAngle = currentAngle+ angle;
+
+        Rotating = true;
+    }
+
+    bool Rotating = false;
+    float currentAngle = -Mathf.PI / 2;
+    float newAngle;
+    float angle;
+
+    private void Update()
+    {
+        if (Rotating)
+        {
+            currentAngle = Mathf.Lerp(currentAngle, newAngle, 0.2f);
+
+            if (Mathf.Abs(currentAngle - newAngle) < 0.1f)
+            {
+                Rotating = false;
+                currentAngle = newAngle;
+            }
+
+            SetPositions();
+            SetRotations();
         }
     }
 }
