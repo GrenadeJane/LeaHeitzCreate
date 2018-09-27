@@ -146,6 +146,7 @@ public class Carousel : MonoBehaviour {
         place.gameObject.transform.parent = this.transform; 
     }
 
+ 
     [ContextMenu("Displau Photos")]
     public void DisplayPhotos()
     {

@@ -3,9 +3,14 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
+
 
 public class GoogleResultsReader : MonoBehaviour
 {
+    public float height = 200f;
+    public float width = 200f;
+
     #region Constants
     const string GOOGLE_API_KEY = "AIzaSyDxZDslnDL8yKkMv-kPTmgBiwedufQ_uHs";
 
@@ -24,6 +29,7 @@ public class GoogleResultsReader : MonoBehaviour
     [Serializable] public class UnityEvent_AddPlace : UnityEvent<PlaceContent> { }
 
     [SerializeField] public UnityEvent_AddPlace AddPlaceToCarousel;
+    [SerializeField] public UnityEvent ShowCarousel;
 
     #endregion
 
@@ -52,18 +58,23 @@ public class GoogleResultsReader : MonoBehaviour
             }
         }
         Debug.Log(res);
+
+        // :: to move to carousel
     }
 
     void ReadPhotos(string photoRef)
     {
-        string query = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=750&photoreference=" + photoRef + "&key=" + GOOGLE_API_KEY;
+        string query = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=" + photoRef + "&key=" + GOOGLE_API_KEY;
         StartCoroutine(CallGoogleApiImage(query, CreatePrefabPhoto));
     }
 
+    // send it  to carousel 's script
     void CreatePrefabPhoto(Texture2D tex)
     {
         GameObject obj = Instantiate(prefabPhoto);
-        obj.GetComponent<SpriteRenderer>().sprite = Sprite.Create(tex, new Rect(0,0,200,200),  Vector2.zero);
+        float ratio = tex.height / tex.width;
+        obj.GetComponent<RawImage>().texture = tex;
+        obj.GetComponent<RectTransform>().sizeDelta = new Vector2(tex.width, tex.height);
         AddPlaceToCarousel.Invoke(obj.GetComponent<PlaceContent>());
     }
 
