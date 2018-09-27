@@ -42,12 +42,47 @@ public class Carousel : MonoBehaviour {
         set { _inclinaisonIntensity = value; SetPositions(); }
     }
 
+    [SerializeField]
+    [Range(-180f, 180)]
+    private float rotationY;
+    public float RotationY
+    {
+        get { return rotationY; }
+        set { rotationY = value; SetRotations(); }
+
+    }
+
+    [SerializeField]
+    [Range(-180f, 180)]
+    private float rotationZ;
+    public float RotationZ
+    {
+        get { return rotationZ; }
+        set { rotationZ = value; SetRotations(); }
+
+    }
+
+
+    [SerializeField]
+    [Range(1f, 360f)]
+    private  float _modulo;
+    public float Modulo
+    {
+        get { return _modulo; }
+        set { _modulo = value; SetRotations(); }
+
+    }
+
+
     void OnValidate()
     {
         SpaceX = _spaceX;
         SpaceY = _spaceY;
         Inclinaison = _inclinaison;
-
+        InclinaisonIntensity = _inclinaisonIntensity;
+        RotationY = rotationY;
+        RotationZ = rotationZ;
+        Modulo = _modulo;
     }
 
 
@@ -78,6 +113,7 @@ public class Carousel : MonoBehaviour {
         }
 
         SetPositions();
+        SetRotations();
     }
 
 
@@ -105,4 +141,21 @@ public class Carousel : MonoBehaviour {
             obj.transform.position += transform.position;
         }
 	}
+
+
+    /// <summary>
+    /// Set the rotations  of the photos
+    /// </summary>
+
+    void SetRotations()
+    {
+        float angle = Mathf.PI * 2 / children.Count;
+
+        for (int i = 0; i < children.Count; i++)
+        {
+            GameObject obj = children[i];
+            float cos = Mathf.Cos(angle * i - Mathf.PI / 2);
+            obj.transform.rotation = Quaternion.Euler(new Vector3(0, rotationY * Math.Sign(cos), rotationZ  * cos));
+        }
+    }
 }
