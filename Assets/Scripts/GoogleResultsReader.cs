@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class GoogleResultsReader : MonoBehaviour
 {
@@ -27,9 +28,10 @@ public class GoogleResultsReader : MonoBehaviour
     }
 
 
-    public void ReadGoogleResults(string results)
+    public void ReadGoogleResults(string response)
     {
-
+        ResultsGooglePlace res = JsonUtility.FromJson<ResultsGooglePlace>(response);
+        Debug.Log(res);
     }
 
     public string AskNextPage(string idNextRound)
@@ -43,6 +45,8 @@ public class GoogleResultsReader : MonoBehaviour
         yield return googleResponse;
         string response = googleResponse.text;
         Debug.Log(response);
+
+        ReadGoogleResults(response);
     }
 
 }

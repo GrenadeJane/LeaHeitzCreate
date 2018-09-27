@@ -1,23 +1,34 @@
 ﻿using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public class ResultsGooglePlace
+{
+    public string next_page_token;
+    [SerializeField]
+    public List<LocationData> results;
+}
+
+[Serializable]
 public class LocationData
 {
     public string   icon,
                     id,
                     name;
     // opening hours
+    [SerializeField]
     public OpeningHours opening_hours;
+    [SerializeField]
     public Photos[] photos;
 }
-
-public struct OpeningHours
+[Serializable]
+public class OpeningHours
 {
     public bool open_now;
 }
-
-public struct Photos
+[Serializable]
+public class Photos
 {
     public int   height,
                  width;
