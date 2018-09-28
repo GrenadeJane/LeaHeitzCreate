@@ -10,12 +10,29 @@ public class ResultsGooglePlace
     public List<LocationData> results;
 }
 
+public class ResultDetailGooglePlace
+{
+    [SerializeField]
+    public LocationDetails result;
+}
+
+[Serializable]
+public class LocationDetails
+{
+    public string formatted_address;
+    public string formatted_phone_number;
+    public float rating;
+    public string[] types;
+    public string website;
+}
+
 [Serializable]
 public class LocationData
 {
-    public string   icon,
+    public string icon,
                     id,
-                    name;
+                    name,
+        place_id;
     // opening hours
     [SerializeField]
     public OpeningHours opening_hours;

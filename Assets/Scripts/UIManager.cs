@@ -30,10 +30,15 @@ public class UIManager : MonoBehaviour {
         carouselContainer.SetActive(true);
     }
 
-    public void ShowInfoPanel(string title, string text)
+    public void ShowInfoPanel(string title, string text, LocationDetails details = null)
     {
         titleInfoLabel.text = title;
-        textInfoLabel.text = text;
+        textInfoLabel.text = text + '\n';
+        textInfoLabel.text += details.formatted_address + '\n';
+        textInfoLabel.text += details.formatted_phone_number + '\n';
+        textInfoLabel.text += details.website + '\n';
+        textInfoLabel.text += details.rating + '\n';
+        //textInfoLabel.text += details.types.ToString();
 
         infoPanelAnimator.SetTrigger("Open");
     }

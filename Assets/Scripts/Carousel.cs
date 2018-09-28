@@ -237,6 +237,13 @@ public class Carousel : MonoBehaviour {
 
         DisplayPhotos();
         uiManager.SetCarouselActive();
+
+        for (int i = 0; i < locationList.Count; i++)
+        {
+            string query = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + locationList[i].GetID() + "&fields=rating,formatted_phone_number,formatted_address";
+            yield return StartCoroutine(GoogleResultsReader.CallGoogleApi(query, locationList[i].SaveDetails));
+        }
+
     }
 
 
@@ -407,6 +414,7 @@ public class Carousel : MonoBehaviour {
 
         goalAngle = listPositionAngle[indexClosest];
         currentLocation = indexClosest;
+        locationList[currentLocation].SetAsActivePlace();
 
         isRotating = true;
     }

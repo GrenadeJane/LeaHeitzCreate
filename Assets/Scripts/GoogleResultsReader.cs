@@ -53,7 +53,7 @@ public class GoogleResultsReader : MonoBehaviour
         return "";
     }
 
-    IEnumerator CallGoogleApi(string googleQuery, UnityAction<string> actionDone )
+    public static  IEnumerator CallGoogleApi(string googleQuery, UnityAction<string> actionDone )
     {
         googleQuery += "&key=";
         googleQuery += GOOGLE_API_KEY;

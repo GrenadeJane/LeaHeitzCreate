@@ -732,6 +732,8 @@ MonoBehaviour:
   carouselContainer: {fileID: 38886817}
   prefabLocation: {fileID: 1377585656882408, guid: b3d1099af5a76cc49950fb9c35a0e315,
     type: 2}
+  velocityAmountlost: 8.6
+  swipeIntensity: 0.02
   _spaceX: 25.6
   _spaceY: 27.9
   _inclinaison: 0.391
@@ -739,9 +741,6 @@ MonoBehaviour:
   rotationY: 0
   rotationZ: 0
   _modulo: 1
-  velocityAmountlost: 8.6
-  swipeIntensity: 0.02
-  minSwipe: 2
 --- !u!223 &299545377
 Canvas:
   m_ObjectHideFlags: 0
@@ -2280,7 +2279,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
-    m_Font: {fileID: 12800000, guid: cb83515a383c84a4a8652260d763cdad, type: 3}
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0

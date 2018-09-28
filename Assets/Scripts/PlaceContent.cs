@@ -7,22 +7,32 @@ using System;
 
 public class PlaceContent : MonoBehaviour
 {
-
+    #region Parameters
     [SerializeField] static   float heightActive =2;
     [SerializeField] static float widthActive = 2;
     [SerializeField] static float heightBackground = 1;
     [SerializeField] static  float widthBackground = 1;
 
+    #endregion
+
+    #region Events 
+    public static event Action<string, string, LocationDetails> OnPressed;
 
     [Serializable] public class UnityEvent_PlaceInfo : UnityEvent<string,string> { }
     [SerializeField] public UnityEvent_PlaceInfo SendPlaceInfo;
 
 
-    public static event Action<string, string> OnPressed;
+    #endregion
 
-     LocationData locationData;
+    #region RuntimeDatas
+
+    LocationData locationData;
+    LocationDetails locationDetails;
 
     bool isActive;
+    
+    #endregion
+
 
     public void Init(LocationData locationData)
     {
@@ -33,30 +43,24 @@ public class PlaceContent : MonoBehaviour
     void Start () {
         SetAsBackgroundPlace();
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
     public void OpenInfos()
     {
         if (isActive)
         {
-            OnPressed.Invoke(locationData.name, "Open" + locationData.opening_hours.open_now.ToString());
+            OnPressed.Invoke(locationData.name, "Open" + locationData.opening_hours.open_now.ToString(), locationDetails);
         }
-        //if (isActive)
-        //{
-        //    SendPlaceInfo.Invoke(locationData.name, "Open" + locationData.opening_hours.open_now.ToString());
-        //}
-        Debug.Log(locationData);
     }
 
     public void SetPicture(Texture2D tex)
     {
         GetComponent<Renderer>().material.mainTexture = tex;
-       // GetComponent<RawImage>().texture = tex;
-        //GetComponent<RectTransform>().sizeDelta = new Vector2(tex.width, tex.height);
+    }
+
+    public void SaveDetails(string jsonResultDetail)
+    {
+        locationDetails = JsonUtility.FromJson<ResultDetailGooglePlace>(jsonResultDetail).result;
+        OpenInfos();
     }
 
     public string GetFirstPhotoRef()
@@ -64,15 +68,18 @@ public class PlaceContent : MonoBehaviour
         return locationData.photos.First().photo_reference;
     }
 
+    public string GetID()
+    {
+        return locationData.place_id;
+    }
+
     public void SetAsActivePlace()
     {
         isActive = true;
-      //  transform.localScale = new Vector2(widthActive, heightActive);
     }
 
     public void SetAsBackgroundPlace()
     {
         isActive = false;
-        //transform.localScale = new Vector2(widthBackground, heightBackground);
     }
 }
