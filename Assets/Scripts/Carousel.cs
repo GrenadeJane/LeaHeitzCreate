@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Carousel : MonoBehaviour {
 
     #region Paramaters
 
+    [SerializeField] GameObject carouselContainer;
+    [SerializeField] GameObject prefabLocation;
 
+    [Space (20)]
     [SerializeField]
     private float _spaceX = 10.0f;
     public float SpaceX
@@ -103,6 +108,8 @@ public class Carousel : MonoBehaviour {
 
 
     List<GameObject> children = new List<GameObject>();
+    List<PlaceContent> locationList = new List<PlaceContent>();
+    UIManager uiManager;
     int currentHightLight = 0;
 
     #endregion
@@ -117,18 +124,7 @@ public class Carousel : MonoBehaviour {
     /// </summary>
     /// 
     void Start() {
-        //foreach (Transform child in transform)
-        //{
-        //    if (child.gameObject.activeSelf)
-        //        children.Add(child.gameObject);
-        //}
-
-        // angle = Mathf.PI * 2 / children.Count;
-
-        //SetPositions();
-        //SetRotations();
-
-        //children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
+        uiManager = GetComponent<UIManager>();
     }
 
 
@@ -140,28 +136,47 @@ public class Carousel : MonoBehaviour {
 
     }
 
-
-    public void AddPlace(PlaceContent place)
+    public void CreateCarousel(ResultsGooglePlace res)
     {
-        place.gameObject.transform.parent = this.transform; 
+        foreach (LocationData location in res.results)
+        {
+            if (location.photos.Count > 0)
+            {
+                CreateLocationInCarousel(location);
+            }
+        }
+
+        StartCoroutine(LoadAllLocations());
+    }
+    public void CreateLocationInCarousel(LocationData locationData)
+    {
+        GameObject obj = Instantiate(prefabLocation, carouselContainer.transform, false);
+        PlaceContent placeContent = obj.GetComponent<PlaceContent>();
+        placeContent.Init(locationData);
+        locationList.Add(placeContent);
     }
 
- 
+    IEnumerator LoadAllLocations()
+    {
+        for (int i = 0; i < locationList.Count; i++)
+        {
+            string query = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=" + locationList[i].GetFirstPhotoRef();
+            yield return StartCoroutine(GoogleResultsReader.CallGoogleApiImage(query, locationList[i].SetPicture));
+        }
+
+        DisplayPhotos();
+        uiManager.SetCarouselActive();
+    }
+
     [ContextMenu("Displau Photos")]
     public void DisplayPhotos()
     {
-        foreach (Transform child in transform)
-        {
-            if (child.gameObject.activeSelf)
-                children.Add(child.gameObject);
-        }
-
-        angle = Mathf.PI * 2 / children.Count;
+        angle = Mathf.PI * 2 / locationList.Count;
 
         SetPositions();
         SetRotations();
 
-        children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
+        locationList[currentHightLight].SetAsActivePlace();
     }
     /// <summary>
     /// Set the positions one of the photos
@@ -170,9 +185,9 @@ public class Carousel : MonoBehaviour {
     void SetPositions()
     {
         Vector2 DotVectorHeight = new Vector2(Mathf.Cos(_inclinaison) * _inclinaisonIntensity, Mathf.Sin(_inclinaison) * _inclinaisonIntensity);
-        for (int i = 0; i < children.Count; i++)
+        for (int i = 0; i < locationList.Count; i++)
         {
-            GameObject obj = children[i];
+            GameObject obj = locationList[i].gameObject;
 
             obj.transform.position = new Vector3(Mathf.Cos(angle * i - currentAngle) * _spaceX, 0, Mathf.Sin(angle * i - currentAngle) * SpaceY);
 
@@ -190,9 +205,9 @@ public class Carousel : MonoBehaviour {
 
     void SetRotations()
     {
-        for (int i = 0; i < children.Count; i++)
+        for (int i = 0; i < locationList.Count; i++)
         {
-            GameObject obj = children[i];
+            GameObject obj = locationList[i].gameObject;
             float cos = Mathf.Cos(angle * i - currentAngle);
             obj.transform.rotation = Quaternion.Euler(new Vector3(0, rotationY * Math.Sign(cos), rotationZ * cos));
         }
@@ -202,10 +217,10 @@ public class Carousel : MonoBehaviour {
     {
         if (Rotating)
             return;
-        children[currentHightLight].GetComponent<PlaceContent>().SetAsBackgroundPlace();
-        currentHightLight = (currentHightLight == 0) ? children.Count - 1 : currentHightLight - 1;
+        locationList[currentHightLight].SetAsBackgroundPlace();
+        currentHightLight = (currentHightLight == 0) ? locationList.Count - 1 : currentHightLight - 1;
 
-        children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
+        locationList[currentHightLight].SetAsActivePlace();
         Rotating = true;
         newAngle = currentAngle - angle;
     }
@@ -215,12 +230,12 @@ public class Carousel : MonoBehaviour {
         if (Rotating)
             return;
 
-        children[currentHightLight].GetComponent<PlaceContent>().SetAsBackgroundPlace();
-        currentHightLight = (currentHightLight == children.Count - 1) ? 0 : currentHightLight + 1;
+        locationList[currentHightLight].SetAsBackgroundPlace();
+        currentHightLight = (currentHightLight == locationList.Count - 1) ? 0 : currentHightLight + 1;
 
         newAngle = currentAngle+ angle;
 
-        children[currentHightLight].GetComponent<PlaceContent>().SetAsActivePlace();
+        locationList[currentHightLight].SetAsActivePlace();
 
         Rotating = true;
     }

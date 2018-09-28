@@ -1,6 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Linq;
 
 public class PlaceContent : MonoBehaviour {
 
@@ -8,6 +8,14 @@ public class PlaceContent : MonoBehaviour {
     [SerializeField] static float widthActive = 2;
     [SerializeField] static float heightBackground = 1;
     [SerializeField] static  float widthBackground = 1;
+
+     LocationData locationData;
+
+    public void Init(LocationData locationData)
+    {
+        this.locationData = locationData;
+    }
+
     // Use this for initialization
     void Start () {
 		
@@ -17,6 +25,17 @@ public class PlaceContent : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public void SetPicture(Texture2D tex)
+    {
+        GetComponent<RawImage>().texture = tex;
+        GetComponent<RectTransform>().sizeDelta = new Vector2(tex.width, tex.height);
+    }
+
+    public string GetFirstPhotoRef()
+    {
+        return locationData.photos.First().photo_reference;
+    }
 
     public void SetAsActivePlace()
     {

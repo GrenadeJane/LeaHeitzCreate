@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -19,16 +18,13 @@ public class GoogleResultsReader : MonoBehaviour
 
     #endregion
 
-    #region Parameters 
-    [SerializeField] GameObject prefabPhoto;
-
-    #endregion
 
     #region Events
 
     [Serializable] public class UnityEvent_AddPlace : UnityEvent<PlaceContent> { }
+    [Serializable] public class UnityEvent_CreateLocation : UnityEvent<ResultsGooglePlace> { }
 
-    [SerializeField] public UnityEvent_AddPlace AddPlaceToCarousel;
+    [SerializeField] public UnityEvent_CreateLocation CreateCarousel;
     [SerializeField] public UnityEvent ShowCarousel;
 
     #endregion
@@ -38,10 +34,8 @@ public class GoogleResultsReader : MonoBehaviour
         string googleQuery = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=";
         googleQuery += input;
         googleQuery +=
-             // "&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry" +
-             "&location=" + NIVELLES_LOCATION_LATITUDE + "," + NIVELLES_LOCATION_LONGITUDE + "&radius=1500" +
-            "&key=";
-        googleQuery += GOOGLE_API_KEY;
+             "&location=" + NIVELLES_LOCATION_LATITUDE + "," + NIVELLES_LOCATION_LONGITUDE + "&radius=1500";
+           
 
         StartCoroutine(CallGoogleApi(googleQuery, ReadGoogleResults));
     }
@@ -50,33 +44,11 @@ public class GoogleResultsReader : MonoBehaviour
     public void ReadGoogleResults(string response)
     {
         ResultsGooglePlace res = JsonUtility.FromJson<ResultsGooglePlace>(response);
-        foreach (LocationData location in res.results)
-        {
-            if (location.photos.Count > 0)
-            {
-                ReadPhotos(location.photos.First().photo_reference);
-            }
-        }
+        CreateCarousel.Invoke(res);
+
         Debug.Log(res);
-
-        // :: to move to carousel
     }
 
-    void ReadPhotos(string photoRef)
-    {
-        string query = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=" + photoRef + "&key=" + GOOGLE_API_KEY;
-        StartCoroutine(CallGoogleApiImage(query, CreatePrefabPhoto));
-    }
-
-    // send it  to carousel 's script
-    void CreatePrefabPhoto(Texture2D tex)
-    {
-        GameObject obj = Instantiate(prefabPhoto);
-        float ratio = tex.height / tex.width;
-        obj.GetComponent<RawImage>().texture = tex;
-        obj.GetComponent<RectTransform>().sizeDelta = new Vector2(tex.width, tex.height);
-        AddPlaceToCarousel.Invoke(obj.GetComponent<PlaceContent>());
-    }
 
     public string AskNextPage(string idNextRound)
     {
@@ -85,6 +57,9 @@ public class GoogleResultsReader : MonoBehaviour
 
     IEnumerator CallGoogleApi(string googleQuery, UnityAction<string> actionDone )
     {
+        googleQuery += "&key=";
+        googleQuery += GOOGLE_API_KEY;
+
         WWW googleResponse = new WWW(googleQuery);
         yield return googleResponse;
         string response = googleResponse.text;
@@ -93,8 +68,11 @@ public class GoogleResultsReader : MonoBehaviour
         actionDone(response);
     }
 
-    IEnumerator CallGoogleApiImage(string googleQuery, UnityAction<Texture2D> actionDone)
+    public static IEnumerator CallGoogleApiImage(string googleQuery, UnityAction<Texture2D> actionDone)
     {
+        googleQuery += "&key=";
+        googleQuery += GOOGLE_API_KEY;
+
         WWW googleResponse = new WWW(googleQuery);
         yield return googleResponse;
 
