@@ -79,16 +79,6 @@ public class Carousel : MonoBehaviour {
     }
 
 
-    [SerializeField]
-    [Range(1f, 360f)]
-    private float _test;
-    public float Test
-    {
-        get { return _test; }
-        set { _test = value; SetRotations(); SetPositions(); }
-
-    }
-
     void OnValidate()
     {
         SpaceX = _spaceX;
@@ -98,7 +88,6 @@ public class Carousel : MonoBehaviour {
         RotationY = rotationY;
         RotationZ = rotationZ;
         Modulo = _modulo;
-        Test = _test;
     }
 
 
@@ -125,6 +114,7 @@ public class Carousel : MonoBehaviour {
     /// 
     void Start() {
         uiManager = GetComponent<UIManager>();
+        locationList.Clear();
     }
 
 
@@ -168,7 +158,21 @@ public class Carousel : MonoBehaviour {
         uiManager.SetCarouselActive();
     }
 
+
     [ContextMenu("Displau Photos")]
+    void Test()
+    {
+        locationList.Clear();
+        foreach (Transform child in carouselContainer.transform)
+        {
+            GameObject obj = child.gameObject;
+            PlaceContent placeContent = obj.GetComponent<PlaceContent>();
+            locationList.Add(placeContent);
+        }
+
+        DisplayPhotos();
+    }
+
     public void DisplayPhotos()
     {
         angle = Mathf.PI * 2 / locationList.Count;
@@ -185,6 +189,7 @@ public class Carousel : MonoBehaviour {
     void SetPositions()
     {
         Vector2 DotVectorHeight = new Vector2(Mathf.Cos(_inclinaison) * _inclinaisonIntensity, Mathf.Sin(_inclinaison) * _inclinaisonIntensity);
+        float masterdot = Vector2.Dot(new Vector2(SpaceY, 0), DotVectorHeight);
         for (int i = 0; i < locationList.Count; i++)
         {
             GameObject obj = locationList[i].gameObject;
@@ -192,9 +197,9 @@ public class Carousel : MonoBehaviour {
             obj.transform.position = new Vector3(Mathf.Cos(angle * i - currentAngle) * _spaceX, 0, Mathf.Sin(angle * i - currentAngle) * SpaceY);
 
             float dot = Vector2.Dot(new Vector2(obj.transform.position.z, 0), DotVectorHeight);
-            obj.transform.position += new Vector3(0, (DotVectorHeight * dot).y, 0);
+            obj.transform.position += new Vector3(0, (DotVectorHeight * dot).y  + DotVectorHeight.y * SpaceY, _spaceY );
+            obj.transform.position += carouselContainer.transform.position;
 
-            obj.transform.position += transform.position;
         }
     }
 
@@ -209,7 +214,7 @@ public class Carousel : MonoBehaviour {
         {
             GameObject obj = locationList[i].gameObject;
             float cos = Mathf.Cos(angle * i - currentAngle);
-            obj.transform.rotation = Quaternion.Euler(new Vector3(0, rotationY * Math.Sign(cos), rotationZ * cos));
+            obj.transform.rotation = Quaternion.Euler(new Vector3(-90, rotationY * Math.Sign(cos), rotationZ * cos));
         }
     }
 

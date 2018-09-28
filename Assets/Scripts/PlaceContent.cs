@@ -28,8 +28,9 @@ public class PlaceContent : MonoBehaviour {
 
     public void SetPicture(Texture2D tex)
     {
-        GetComponent<RawImage>().texture = tex;
-        GetComponent<RectTransform>().sizeDelta = new Vector2(tex.width, tex.height);
+        GetComponent<Renderer>().material.mainTexture = tex;
+       // GetComponent<RawImage>().texture = tex;
+        //GetComponent<RectTransform>().sizeDelta = new Vector2(tex.width, tex.height);
     }
 
     public string GetFirstPhotoRef()
@@ -39,11 +40,11 @@ public class PlaceContent : MonoBehaviour {
 
     public void SetAsActivePlace()
     {
-        transform.localScale = new Vector2(widthActive, heightActive);
+      //  transform.localScale = new Vector2(widthActive, heightActive);
     }
 
     public void SetAsBackgroundPlace()
     {
-        transform.localScale = new Vector2(widthBackground, heightBackground);
+        //transform.localScale = new Vector2(widthBackground, heightBackground);
     }
 }
