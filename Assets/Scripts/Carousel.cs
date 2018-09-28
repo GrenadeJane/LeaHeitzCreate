@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class Carousel : MonoBehaviour {
 
@@ -10,6 +11,12 @@ public class Carousel : MonoBehaviour {
 
     [SerializeField] GameObject carouselContainer;
     [SerializeField] GameObject prefabLocation;
+
+
+    public float velocityAmountlost = 0.5f;
+
+    public float swipeIntensity = 2f;
+    bool isSwiping = false;
 
     [Space (20)]
     [SerializeField]
@@ -96,10 +103,23 @@ public class Carousel : MonoBehaviour {
     #region RunTimeDatas
 
 
-    List<GameObject> children = new List<GameObject>();
     List<PlaceContent> locationList = new List<PlaceContent>();
+    List<float> listPositionAngle = new List<float>();
+
     UIManager uiManager;
-    int currentHightLight = 0;
+
+    Vector2 lastPosition = Vector2.zero;
+    Vector2 lastDirection = Vector2.zero;
+
+    float partitionAngle;
+    float startAngle = Mathf.PI / 2;
+    float currentAngle;
+    float goalAngle;
+    float velocity = 0;
+
+    int currentLocation = 0;
+
+    bool isRotating = false;
 
     #endregion
 
@@ -115,8 +135,53 @@ public class Carousel : MonoBehaviour {
     void Start() {
         uiManager = GetComponent<UIManager>();
         locationList.Clear();
+
+        currentAngle = startAngle; 
     }
 
+    private void Update()
+    {
+        if (isRotating)
+        {
+            currentAngle = Mathf.Lerp(currentAngle, goalAngle, 0.2f);
+
+            if (Mathf.Abs(currentAngle - goalAngle) < 0.1f)
+            {
+                isRotating = false;
+                currentAngle = goalAngle;
+
+            }
+
+            SetPositions();
+            SetRotations();
+
+        }
+
+        if (Mathf.Abs(velocity) > 0.5f)
+        {
+            goalAngle = currentAngle + velocity * swipeIntensity;
+            velocity = (velocity > 0) ? velocity - velocityAmountlost : velocity + velocityAmountlost;
+
+            if ((Mathf.Abs(velocity) < velocityAmountlost))
+            {
+                FindClosestPlace();
+                velocity = 0f;
+            }
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Plane plane = new Plane(Vector3.up, carouselContainer.transform.position);
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit = new RaycastHit();
+            float distance;
+
+            if (Physics.Raycast(ray, out hit) && !isSwiping)
+            {
+                hit.collider.GetComponent<PlaceContent>().OpenInfos();
+            }
+        }
+    }
 
 
     #endregion
@@ -126,6 +191,10 @@ public class Carousel : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// Create Carousel from the information in the res parameters
+    /// </summary>
+    /// <param name="res"> The results from the google query </param>
     public void CreateCarousel(ResultsGooglePlace res)
     {
         PlaceContent.OnPressed += uiManager.ShowInfoPanel;
@@ -140,6 +209,12 @@ public class Carousel : MonoBehaviour {
 
         StartCoroutine(LoadAllLocations());
     }
+
+
+    /// <summary>
+    /// Instantiate and Init the place content of the places
+    /// </summary>
+    /// <param name="locationData"> The current locationData </param>
     public void CreateLocationInCarousel(LocationData locationData)
     {
         GameObject obj = Instantiate(prefabLocation, carouselContainer.transform, false);
@@ -148,6 +223,10 @@ public class Carousel : MonoBehaviour {
         locationList.Add(placeContent);
     }
 
+
+    /// <summary>
+    /// Get The Photos from all the places in one point and show the photos after that
+    /// </summary>
     IEnumerator LoadAllLocations()
     {
         for (int i = 0; i < locationList.Count; i++)
@@ -175,15 +254,27 @@ public class Carousel : MonoBehaviour {
         DisplayPhotos();
     }
 
+    /// <summary>
+    /// Display the photos for the first time and save the angle position of the photos
+    /// </summary>
+    /// 
     public void DisplayPhotos()
     {
-        angle = Mathf.PI * 2 / locationList.Count;
+        partitionAngle = Mathf.PI * 2 / locationList.Count;
 
         SetPositions();
         SetRotations();
 
-        locationList[currentHightLight].SetAsActivePlace();
+        for (int i = 0; i < locationList.Count; i++)
+        {
+            float anglePosition = Utility.ClampAngle(startAngle + partitionAngle * i);
+            listPositionAngle.Add(anglePosition);
+        }
+
+        locationList[currentLocation].SetAsActivePlace();
     }
+
+
     /// <summary>
     /// Set the positions one of the photos
     /// </summary>
@@ -196,7 +287,7 @@ public class Carousel : MonoBehaviour {
         {
             GameObject obj = locationList[i].gameObject;
 
-            obj.transform.position = new Vector3(Mathf.Cos(angle * i - currentAngle) * _spaceX, 0, Mathf.Sin(angle * i - currentAngle) * SpaceY);
+            obj.transform.position = new Vector3(Mathf.Cos(partitionAngle * i - currentAngle) * _spaceX, 0, Mathf.Sin(partitionAngle * i - currentAngle) * SpaceY);
 
             float dot = Vector2.Dot(new Vector2(obj.transform.position.z, 0), DotVectorHeight);
             obj.transform.position += new Vector3(0, (DotVectorHeight * dot).y  + DotVectorHeight.y * SpaceY, _spaceY );
@@ -215,71 +306,108 @@ public class Carousel : MonoBehaviour {
         for (int i = 0; i < locationList.Count; i++)
         {
             GameObject obj = locationList[i].gameObject;
-            float cos = Mathf.Cos(angle * i - currentAngle);
+            float cos = Mathf.Cos(partitionAngle * i - currentAngle);
             obj.transform.localRotation = Quaternion.Euler(new Vector3(90, rotationY * Math.Sign(cos) + 180,0));
         }
     }
 
+
+    /// <summary>
+    /// Moves the carousel to the left 
+    /// </summary>
+    /// 
     public void OnLeftTurn()
     {
-        if (Rotating)
+        if (isRotating)
             return;
-        locationList[currentHightLight].SetAsBackgroundPlace();
-        currentHightLight = (currentHightLight == 0) ? locationList.Count - 1 : currentHightLight - 1;
+        locationList[currentLocation].SetAsBackgroundPlace();
+        currentLocation = (currentLocation == 0) ? locationList.Count - 1 : currentLocation - 1;
 
-        locationList[currentHightLight].SetAsActivePlace();
-        Rotating = true;
-        newAngle = currentAngle - angle;
+        locationList[currentLocation].SetAsActivePlace();
+        isRotating = true;
+        goalAngle = currentAngle - partitionAngle;
     }
 
+
+    /// <summary>
+    /// Moves the carousel to the right 
+    /// </summary>
+    /// 
     public void OnRightTurn()
     {
-        if (Rotating)
+        if (isRotating)
             return;
 
-        locationList[currentHightLight].SetAsBackgroundPlace();
-        currentHightLight = (currentHightLight == locationList.Count - 1) ? 0 : currentHightLight + 1;
+        locationList[currentLocation].SetAsBackgroundPlace();
+        currentLocation = (currentLocation == locationList.Count - 1) ? 0 : currentLocation + 1;
 
-        newAngle = currentAngle+ angle;
+        goalAngle = currentAngle+ partitionAngle;
 
-        locationList[currentHightLight].SetAsActivePlace();
+        locationList[currentLocation].SetAsActivePlace();
 
-        Rotating = true;
+        isRotating = true;
     }
 
-    bool Rotating = false;
-    float currentAngle = Mathf.PI / 2;
-    float newAngle;
-    float angle;
 
-    private void Update()
+
+
+    /// <summary>
+    /// Moves the carousel according to the input of the swipe
+    /// </summary>
+    /// 
+    public void Swipe(Vector2 direction)
     {
-        if (Rotating)
+        int sign = (direction.x > 0) ? -1 : 1;
+
+        isSwiping = true;
+        lastDirection = direction;
+        currentAngle = Mathf.Lerp(currentAngle, (currentAngle + direction.magnitude * sign)  , swipeIntensity);
+
+        SetPositions();
+        SetRotations();
+    }
+
+
+    /// <summary>
+    /// The swipe is released
+    /// </summary>
+    /// 
+    public void OnSwipeEnd()
+    {
+        velocity = lastDirection.magnitude  ;
+        velocity *= (lastDirection.x > 0) ? -1 : 1;
+
+        isRotating = true;
+        isSwiping = false;
+    }
+
+
+    /// <summary>
+    /// Find the closest Location from the camera and go to it
+    /// </summary>
+    /// 
+    void FindClosestPlace()
+    {
+        float closestDistance = 900000000;
+        int indexClosest = -1;
+
+        for (int i = 0; i < locationList.Count; i++)
         {
-            currentAngle = Mathf.Lerp(currentAngle, newAngle, 0.2f);
-
-            if (Mathf.Abs(currentAngle - newAngle) < 0.1f)
+            if (locationList[i].gameObject.transform.localPosition.z < closestDistance)
             {
-                Rotating = false;
-                currentAngle = newAngle;
+                closestDistance = locationList[i].gameObject.transform.localPosition.z;
+                indexClosest = i;
             }
-
-            SetPositions();
-            SetRotations();
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            Plane plane = new Plane(Vector3.up, carouselContainer.transform.position);
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit = new RaycastHit();
-            float distance;
+        if (indexClosest == -1)
+            Debug.LogError("no index found for closest");
 
-            if (Physics.Raycast(ray,out hit))
-            {
-                hit.collider.GetComponent<PlaceContent>().OpenInfos();
-            }
-        }
-      
+        currentAngle = Utility.ClampAngle(currentAngle);
+
+        goalAngle = listPositionAngle[indexClosest];
+        currentLocation = indexClosest;
+
+        isRotating = true;
     }
 }
