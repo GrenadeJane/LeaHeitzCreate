@@ -128,6 +128,8 @@ public class Carousel : MonoBehaviour {
 
     public void CreateCarousel(ResultsGooglePlace res)
     {
+        PlaceContent.OnPressed += uiManager.ShowInfoPanel;
+
         foreach (LocationData location in res.results)
         {
             if (location.photos.Count > 0)
@@ -265,5 +267,19 @@ public class Carousel : MonoBehaviour {
             SetPositions();
             SetRotations();
         }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Plane plane = new Plane(Vector3.up, carouselContainer.transform.position);
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit = new RaycastHit();
+            float distance;
+
+            if (Physics.Raycast(ray,out hit))
+            {
+                hit.collider.GetComponent<PlaceContent>().OpenInfos();
+            }
+        }
+      
     }
 }

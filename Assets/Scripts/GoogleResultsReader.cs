@@ -21,11 +21,9 @@ public class GoogleResultsReader : MonoBehaviour
 
     #region Events
 
-    [Serializable] public class UnityEvent_AddPlace : UnityEvent<PlaceContent> { }
     [Serializable] public class UnityEvent_CreateLocation : UnityEvent<ResultsGooglePlace> { }
 
     [SerializeField] public UnityEvent_CreateLocation CreateCarousel;
-    [SerializeField] public UnityEvent ShowCarousel;
 
     #endregion
 
