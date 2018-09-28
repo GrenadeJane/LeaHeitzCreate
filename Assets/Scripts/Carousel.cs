@@ -216,7 +216,7 @@ public class Carousel : MonoBehaviour {
         {
             GameObject obj = locationList[i].gameObject;
             float cos = Mathf.Cos(angle * i - currentAngle);
-            obj.transform.rotation = Quaternion.Euler(new Vector3(-90, rotationY * Math.Sign(cos), rotationZ * cos));
+            obj.transform.localRotation = Quaternion.Euler(new Vector3(90, rotationY * Math.Sign(cos) + 180,0));
         }
     }
 

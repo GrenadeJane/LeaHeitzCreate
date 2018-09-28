@@ -22,11 +22,13 @@ public class LocationData
     [SerializeField]
     public List<Photos> photos;
 }
+
 [Serializable]
 public class OpeningHours
 {
     public bool open_now;
 }
+
 [Serializable]
 public class Photos
 {
