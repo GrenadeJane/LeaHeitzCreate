@@ -2,23 +2,34 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using UnityEngine.Events;
 
 public class Carousel : MonoBehaviour {
 
     #region Paramaters
+    [Space(10)]
 
+    [Header("GameObjects")]
     [SerializeField] GameObject carouselContainer;
     [SerializeField] GameObject prefabLocation;
 
+    [Space(10)]
 
-    public float velocityAmountlost = 0.5f;
+    [Header("Swipe")]
+    [SerializeField] float swipeIntensity = 2f;
+    [SerializeField] float velocityAmountlost = 0.5f;
 
-    public float swipeIntensity = 2f;
-    bool isSwiping = false;
+    [Space (10)]
 
-    [Space (20)]
+    [Header("Carousel's display parameters")]
+    [SerializeField]
+    private uint _numberItem = 10;
+    public uint NumberItem
+    {
+        get { return _numberItem; }
+        set { _numberItem = value; Clear();  }
+    }
+
     [SerializeField]
     private float _spaceX = 10.0f;
     public float SpaceX
@@ -47,11 +58,11 @@ public class Carousel : MonoBehaviour {
 
     [SerializeField]
     [Range(1f, 10f)]
-    private float _inclinaisonIntensity;
-    public float InclinaisonIntensity
+    private float _inclinaisonMultiplier;
+    public float InclinaisonMultiplier
     {
-        get { return _inclinaisonIntensity; }
-        set { _inclinaisonIntensity = value; SetPositions(); }
+        get { return _inclinaisonMultiplier; }
+        set { _inclinaisonMultiplier = value; SetPositions(); }
     }
 
     [SerializeField]
@@ -64,41 +75,27 @@ public class Carousel : MonoBehaviour {
 
     }
 
-    [SerializeField]
-    [Range(-180f, 180)]
-    private float rotationZ;
-    public float RotationZ
-    {
-        get { return rotationZ; }
-        set { rotationZ = value; SetRotations(); }
-
-    }
-
-
-    [SerializeField]
-    [Range(1f, 360f)]
-    private float _modulo;
-    public float Modulo
-    {
-        get { return _modulo; }
-        set { _modulo = value; SetRotations(); }
-
-    }
-
-
     void OnValidate()
     {
         SpaceX = _spaceX;
         SpaceY = _spaceY;
         Inclinaison = _inclinaison;
-        InclinaisonIntensity = _inclinaisonIntensity;
+        InclinaisonMultiplier = _inclinaisonMultiplier;
         RotationY = rotationY;
-        RotationZ = rotationZ;
-        Modulo = _modulo;
     }
 
 
     #endregion
+
+
+
+    #region Events
+
+    [Serializable] public class UnityEvent_Search : UnityEvent<string> { }
+    [SerializeField] public UnityEvent_Search GetNextPageGoogleNearbySearch;
+
+    #endregion
+
 
     #region RunTimeDatas
 
@@ -120,6 +117,7 @@ public class Carousel : MonoBehaviour {
     int currentLocation = 0;
 
     bool isRotating = false;
+    bool isSwiping = false;
 
     #endregion
 
@@ -188,7 +186,13 @@ public class Carousel : MonoBehaviour {
 
     void Clear()
     {
+        foreach (PlaceContent place in locationList)
+        {
 
+        }
+
+        locationList.Clear();
+        currentAngle = startAngle;
     }
 
     /// <summary>
@@ -201,13 +205,24 @@ public class Carousel : MonoBehaviour {
 
         foreach (LocationData location in res.results)
         {
+            // :: enough item in the carousel
+            if (_numberItem >= locationList.Count)
+                break;
+
             if (location.photos.Count > 0)
             {
                 CreateLocationInCarousel(location);
             }
         }
 
-        StartCoroutine(LoadAllLocations());
+
+        if (res.next_page_token != null && _numberItem > locationList.Count)
+        {
+            GetNextPageGoogleNearbySearch.Invoke(res.next_page_token);
+        }
+        else
+            StartCoroutine(LoadAllLocations());
+
     }
 
 
@@ -288,7 +303,7 @@ public class Carousel : MonoBehaviour {
 
     void SetPositions()
     {
-        Vector2 DotVectorHeight = new Vector2(Mathf.Cos(_inclinaison) * _inclinaisonIntensity, Mathf.Sin(_inclinaison) * _inclinaisonIntensity);
+        Vector2 DotVectorHeight = new Vector2(Mathf.Cos(_inclinaison) * _inclinaisonMultiplier, Mathf.Sin(_inclinaison) * _inclinaisonMultiplier);
         float masterdot = Vector2.Dot(new Vector2(SpaceY, 0), DotVectorHeight);
         for (int i = 0; i < locationList.Count; i++)
         {

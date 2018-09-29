@@ -7,16 +7,25 @@ using UnityEngine.UI;
 
 public class GoogleResultsReader : MonoBehaviour
 {
-    public float height = 200f;
-    public float width = 200f;
-
     #region Constants
+
     const string GOOGLE_API_KEY = "AIzaSyDxZDslnDL8yKkMv-kPTmgBiwedufQ_uHs";
 
     const float NIVELLES_LOCATION_LATITUDE = 50.597000f;
     const float NIVELLES_LOCATION_LONGITUDE = 4.323420f;
 
     #endregion
+
+
+    #region Parameters
+    [Header("NearbySearch Parameters")]
+    [SerializeField] uint radiusNearbySearch = 1500;
+    [SerializeField] float latitudeNearbySearch = NIVELLES_LOCATION_LATITUDE;
+    [SerializeField] float longitudeNearbySearch = NIVELLES_LOCATION_LONGITUDE;
+
+    #endregion
+
+
 
 
     #region Events
@@ -27,14 +36,13 @@ public class GoogleResultsReader : MonoBehaviour
 
     #endregion
 
-    public void SearchGoogleApi(string input)
+
+    public void GoogleApiNearbySearch(string input)
     {
         string googleQuery = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=";
         googleQuery += input;
-        googleQuery +=
-             "&location=" + NIVELLES_LOCATION_LATITUDE + "," + NIVELLES_LOCATION_LONGITUDE + "&radius=1500";
-           
-
+        googleQuery +=  "&location=" + latitudeNearbySearch + "," + longitudeNearbySearch;
+        googleQuery += "&radius=" + radiusNearbySearch;
         StartCoroutine(CallGoogleApi(googleQuery, ReadGoogleResults));
     }
 
@@ -43,17 +51,16 @@ public class GoogleResultsReader : MonoBehaviour
     {
         ResultsGooglePlace res = JsonUtility.FromJson<ResultsGooglePlace>(response);
         CreateCarousel.Invoke(res);
-
-        Debug.Log(res);
     }
 
 
-    public string AskNextPage(string idNextRound)
+    public void GetNextPage(string next_page_token)
     {
-        return "";
+        string googleQuery = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?pagetoken=" + next_page_token;
+        StartCoroutine(CallGoogleApi(googleQuery, ReadGoogleResults));
     }
 
-    public static  IEnumerator CallGoogleApi(string googleQuery, UnityAction<string> actionDone )
+    public static IEnumerator CallGoogleApi(string googleQuery, UnityAction<string> actionDone )
     {
         googleQuery += "&key=";
         googleQuery += GOOGLE_API_KEY;
