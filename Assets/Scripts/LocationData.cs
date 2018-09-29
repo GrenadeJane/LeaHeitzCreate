@@ -8,6 +8,7 @@ public class ResultsGooglePlace
     public string next_page_token;
     [SerializeField]
     public List<LocationData> results;
+    public string status;
 }
 
 public class ResultDetailGooglePlace

@@ -100,7 +100,7 @@ public class Carousel : MonoBehaviour {
 
 
     #region RunTimeDatas
-
+    ResultsGooglePlace currentPlaceResult; // the one which gonna be saved
 
     List<PlaceContent> locationList = new List<PlaceContent>();
     List<float> listPositionAngle = new List<float>();
@@ -132,11 +132,14 @@ public class Carousel : MonoBehaviour {
     /// Implementation of the Start MonoBehaviour
     /// </summary>
     /// 
-    void Start() {
+    void Start()
+    {
         uiManager = GetComponent<UIManager>();
         locationList.Clear();
 
-        currentAngle = startAngle; 
+        currentAngle = startAngle;
+
+        PlaceContent.OnPressed += uiManager.ShowInfoPanel;
     }
 
     private void Update()
@@ -174,7 +177,6 @@ public class Carousel : MonoBehaviour {
             Plane plane = new Plane(Vector3.up, carouselContainer.transform.position);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit = new RaycastHit();
-            float distance;
 
             if (Physics.Raycast(ray, out hit) && !isSwiping)
             {
@@ -200,12 +202,14 @@ public class Carousel : MonoBehaviour {
     /// <param name="res"> The results from the google query </param>
     public void CreateCarousel(ResultsGooglePlace res)
     {
-        PlaceContent.OnPressed += uiManager.ShowInfoPanel;
+
+        if (locationList.Count == 0)
+            currentPlaceResult = res;
 
         foreach (LocationData location in res.results)
         {
             // :: enough item in the carousel
-            if (_numberItem == locationList.Count - 1)
+            if (_numberItem == locationList.Count )
                 break;
 
             if (location.photos.Count > 0)

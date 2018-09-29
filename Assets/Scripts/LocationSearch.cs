@@ -17,6 +17,8 @@ public class LocationSearch : MonoBehaviour {
 
     #region RunTimeData
 
+    UIManager uiManager;
+
     #endregion
 
 
@@ -28,9 +30,10 @@ public class LocationSearch : MonoBehaviour {
 
     #endregion
     // Use this for initialization
-    void Start () {
-		
-	}
+    void Start ()
+    {
+        uiManager = GetComponent<UIManager>();
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -41,5 +44,6 @@ public class LocationSearch : MonoBehaviour {
     {
         string locationSearch = locationInputField.text;
         MakeGoogleResearch.Invoke(locationSearch);
+        uiManager.HideErrorMessage();
     }
 }

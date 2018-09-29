@@ -33,6 +33,7 @@ public class GoogleResultsReader : MonoBehaviour
     [Serializable] public class UnityEvent_CreateLocation : UnityEvent<ResultsGooglePlace> { }
 
     [SerializeField] public UnityEvent_CreateLocation CreateCarousel;
+    [SerializeField] public UnityEvent DisplayErrorNoResults;
 
     #endregion
 
@@ -50,7 +51,10 @@ public class GoogleResultsReader : MonoBehaviour
     public void ReadGoogleResults(string response)
     {
         ResultsGooglePlace res = JsonUtility.FromJson<ResultsGooglePlace>(response);
-        CreateCarousel.Invoke(res);
+        if (res.status == "ZERO_RESULTS")
+            DisplayErrorNoResults.Invoke();
+        else
+            CreateCarousel.Invoke(res);
     }
 
 
