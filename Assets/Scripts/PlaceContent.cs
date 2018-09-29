@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using System;
 
 
-public class PlaceContent : MonoBehaviour
+public class PlaceContent : MonoBehaviour, IObjectPooled
 {
     #region Parameters
     [SerializeField] static   float heightActive =2;
@@ -81,5 +81,11 @@ public class PlaceContent : MonoBehaviour
     public void SetAsBackgroundPlace()
     {
         isActive = false;
+    }
+
+    public void Clean()
+    {
+        locationData = null;
+        locationDetails = null;
     }
 }

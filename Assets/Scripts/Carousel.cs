@@ -7,12 +7,14 @@ using UnityEngine.Events;
 public class Carousel : MonoBehaviour {
 
     #region Paramaters
+    [Header("Pooler")]
+    [SerializeField] ObjectPooler objectPoolerPlace;
+
     [Space(10)]
 
     [Header("GameObjects")]
     [SerializeField] GameObject carouselContainer;
     [SerializeField] GameObject prefabLocation;
-
     [Space(10)]
 
     [Header("Swipe")]
@@ -186,11 +188,8 @@ public class Carousel : MonoBehaviour {
 
     void Clear()
     {
-        foreach (PlaceContent place in locationList)
-        {
-
-        }
-
+        objectPoolerPlace.Clean();
+    
         locationList.Clear();
         currentAngle = startAngle;
     }
@@ -206,7 +205,7 @@ public class Carousel : MonoBehaviour {
         foreach (LocationData location in res.results)
         {
             // :: enough item in the carousel
-            if (_numberItem >= locationList.Count)
+            if (_numberItem == locationList.Count - 1)
                 break;
 
             if (location.photos.Count > 0)
@@ -232,7 +231,8 @@ public class Carousel : MonoBehaviour {
     /// <param name="locationData"> The current locationData </param>
     public void CreateLocationInCarousel(LocationData locationData)
     {
-        GameObject obj = Instantiate(prefabLocation, carouselContainer.transform, false);
+        GameObject obj = objectPoolerPlace.GetPooledObject();
+
         PlaceContent placeContent = obj.GetComponent<PlaceContent>();
         placeContent.Init(locationData);
         locationList.Add(placeContent);

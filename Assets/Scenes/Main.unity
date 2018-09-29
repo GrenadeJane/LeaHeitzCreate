@@ -243,6 +243,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 38886820}
+  - component: {fileID: 38886818}
   m_Layer: 0
   m_Name: carouselContainer
   m_TagString: Untagged
@@ -250,6 +251,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &38886818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 38886817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43cbe374428a1834099918799053de93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 1377585656882408, guid: b3d1099af5a76cc49950fb9c35a0e315, type: 2}
+  maxAmount: 10
+  canGrow: 1
 --- !u!224 &38886820
 RectTransform:
   m_ObjectHideFlags: 0
@@ -731,6 +746,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0729886b6a417d4d9eabee948167e5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  objectPoolerPlace: {fileID: 0}
   carouselContainer: {fileID: 38886817}
   prefabLocation: {fileID: 1377585656882408, guid: b3d1099af5a76cc49950fb9c35a0e315,
     type: 2}
