@@ -472,6 +472,22 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  OnSwipeBegin:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 299545376}
+        m_MethodName: OnSwipeBegin
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
 --- !u!114 &185090155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -769,7 +785,7 @@ MonoBehaviour:
   prefabLocation: {fileID: 1377585656882408, guid: b3d1099af5a76cc49950fb9c35a0e315,
     type: 2}
   swipeIntensity: 0.02
-  velocityAmountlost: 8.6
+  velocityAmountlost: 7.39
   _numberItem: 10
   _spaceX: 25.6
   _spaceY: 27.9

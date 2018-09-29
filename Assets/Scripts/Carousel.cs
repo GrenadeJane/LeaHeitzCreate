@@ -375,7 +375,10 @@ public class Carousel : MonoBehaviour {
     }
 
 
-
+    public void OnSwipeBegin()
+    {
+        locationList[currentLocation].SetAsBackgroundPlace();
+    }
 
     /// <summary>
     /// Moves the carousel according to the input of the swipe

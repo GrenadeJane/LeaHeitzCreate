@@ -9,6 +9,7 @@ public class Swipe : MonoBehaviour, IBeginDragHandler, IDragHandler , IEndDragHa
 
     [SerializeField] public UnityEvent_Swipe Swiping;
     [SerializeField] public UnityEvent OnSwipeEnd;
+    [SerializeField] public UnityEvent OnSwipeBegin;
 
 
     Vector2 lastPosition = Vector2.zero;
@@ -16,6 +17,7 @@ public class Swipe : MonoBehaviour, IBeginDragHandler, IDragHandler , IEndDragHa
     public void OnBeginDrag(PointerEventData eventData)
     {
         lastPosition = eventData.position;
+        OnSwipeBegin.Invoke();
     }
 
     public void OnDrag(PointerEventData eventData)

@@ -7,11 +7,11 @@ using System;
 
 public class PlaceContent : MonoBehaviour, IObjectPooled
 {
-    #region Parameters
-    [SerializeField] static   float heightActive =2;
-    [SerializeField] static float widthActive = 2;
-    [SerializeField] static float heightBackground = 1;
-    [SerializeField] static  float widthBackground = 1;
+    #region Constants
+   const float heightActive = 1.88f;
+   const float widthActive = 3.33f;
+   const float heightBackground = 1.44f;
+   const float widthBackground = 2.56f;
 
     #endregion
 
@@ -40,7 +40,8 @@ public class PlaceContent : MonoBehaviour, IObjectPooled
     }
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
         SetAsBackgroundPlace();
     }
 
@@ -76,11 +77,13 @@ public class PlaceContent : MonoBehaviour, IObjectPooled
     public void SetAsActivePlace()
     {
         isActive = true;
+        transform.localScale = new Vector3(widthActive, 1, heightActive);
     }
 
     public void SetAsBackgroundPlace()
     {
         isActive = false;
+        transform.localScale = new Vector3(widthBackground, 1, heightBackground);
     }
 
     public void Clean()
