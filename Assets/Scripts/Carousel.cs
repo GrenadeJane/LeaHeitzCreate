@@ -142,7 +142,6 @@ public class Carousel : MonoBehaviour {
     /// 
     void Start()
     {
-        Debug.Log(Application.persistentDataPath);
         uiManager = GetComponent<UIManager>();
         locationList.Clear();
 
