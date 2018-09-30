@@ -291,20 +291,6 @@ public class Carousel : MonoBehaviour {
 
     }
 
-    [ContextMenu("Displau Photos")]
-    void Test()
-    {
-        locationList.Clear();
-        foreach (Transform child in carouselContainer.transform)
-        {
-            GameObject obj = child.gameObject;
-            PlaceContent placeContent = obj.GetComponent<PlaceContent>();
-            locationList.Add(placeContent);
-        }
-
-        DisplayPhotos();
-    }
-
     /// <summary>
     /// Display the photos for the first time and save the angle position of the photos
     /// </summary>
