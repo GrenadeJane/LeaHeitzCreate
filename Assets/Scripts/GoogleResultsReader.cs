@@ -10,10 +10,6 @@ using System.Linq;
 
 public class GoogleResultsReader : MonoBehaviour
 {
-    enum resultGoogle
-    {
-        ZERO_RESULTS,
-    }
     #region Constants
 
     const string GOOGLE_API_KEY = "AIzaSyDxZDslnDL8yKkMv-kPTmgBiwedufQ_uHs";
@@ -22,6 +18,7 @@ public class GoogleResultsReader : MonoBehaviour
     const float NIVELLES_LOCATION_LONGITUDE = 4.323420f;
 
     const string SAVE_PATH_JSON = "/google_results_json.json";
+    const string SAVE_PATH_PICTURES = "/placesScreens-";
     #endregion
 
 
@@ -173,14 +170,14 @@ public class GoogleResultsReader : MonoBehaviour
     void EncodeTexture2D(Texture2D tex, string path)
     {
         byte[] bytes = tex.EncodeToPNG();
-        File.WriteAllBytes(Application.persistentDataPath + "/placesScreens-" + path + ".png", bytes);
+        File.WriteAllBytes(Application.persistentDataPath + SAVE_PATH_PICTURES + path + ".png", bytes);
     }
 
     Texture2D GetTexture2DFromPath(string path)
     {
-        if (File.Exists(Application.persistentDataPath + "/placesScreens-" + path + ".png"))
+        if (File.Exists(Application.persistentDataPath + SAVE_PATH_PICTURES + path + ".png"))
         {
-            byte[] bytes = File.ReadAllBytes(Application.persistentDataPath + "/placesScreens-" + path + ".png");
+            byte[] bytes = File.ReadAllBytes(Application.persistentDataPath + SAVE_PATH_PICTURES + path + ".png");
             Texture2D texture = new Texture2D(1, 1);
             texture.LoadImage(bytes);
 
