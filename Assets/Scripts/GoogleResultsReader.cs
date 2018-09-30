@@ -118,7 +118,6 @@ public class GoogleResultsReader : MonoBehaviour
         WWW googleResponse = new WWW(googleQuery);
         yield return googleResponse;
         string response = googleResponse.text;
-        Debug.Log(response);
 
         actionDone(response);
     }

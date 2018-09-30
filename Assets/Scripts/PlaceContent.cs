@@ -66,14 +66,12 @@ public class PlaceContent : MonoBehaviour, IObjectPooled
     public void LoadLocalDetails()
     {
         locationDetails = locationData.details;
-        OpenInfos();
     }
 
 
     public void SetDetails(string jsonResultDetail)
     {
         locationDetails = JsonUtility.FromJson<ResultDetailGooglePlace>(jsonResultDetail).result;
-        OpenInfos();
         SaveDetail.Invoke(this, locationDetails);
     }
 
