@@ -39,6 +39,9 @@ public class LocationData
     public OpeningHours opening_hours;
     [SerializeField]
     public List<Photos> photos;
+
+    public SavedPhoto savedPhoto;
+    public LocationDetails details;
 }
 
 [Serializable]
@@ -55,4 +58,11 @@ public class Photos
 
     public string[] html_attributions;
     public string photo_reference;
+}
+
+[Serializable]
+public class SavedPhoto
+{
+    public string path;
+    public Texture2D texture;
 }

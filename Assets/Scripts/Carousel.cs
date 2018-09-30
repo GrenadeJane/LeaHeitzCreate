@@ -94,13 +94,21 @@ public class Carousel : MonoBehaviour {
     #region Events
 
     [Serializable] public class UnityEvent_Search : UnityEvent<string> { }
+
+    [Serializable] public class UnityEvent_SavePhoto : UnityEvent<PlaceContent, Texture2D> { }
+    [Serializable] public class UnityEvent_SaveDetails : UnityEvent<PlaceContent, LocationDetails> { }
+
     [SerializeField] public UnityEvent_Search GetNextPageGoogleNearbySearch;
+
+    [SerializeField] public UnityEvent_SavePhoto SavePhoto;
+    [SerializeField] public UnityEvent_SaveDetails SaveDetails;
+
+
 
     #endregion
 
 
     #region RunTimeDatas
-    ResultsGooglePlace currentPlaceResult; // the one which gonna be saved
 
     List<PlaceContent> locationList = new List<PlaceContent>();
     List<float> listPositionAngle = new List<float>();
@@ -134,12 +142,15 @@ public class Carousel : MonoBehaviour {
     /// 
     void Start()
     {
+        Debug.Log(Application.persistentDataPath);
         uiManager = GetComponent<UIManager>();
         locationList.Clear();
 
         currentAngle = startAngle;
 
         PlaceContent.OnPressed += uiManager.ShowInfoPanel;
+        PlaceContent.SavePhoto += SavePhoto.Invoke;
+        PlaceContent.SaveDetail += SaveDetails.Invoke;
     }
 
     private void Update()
@@ -200,12 +211,8 @@ public class Carousel : MonoBehaviour {
     /// Create Carousel from the information in the res parameters
     /// </summary>
     /// <param name="res"> The results from the google query </param>
-    public void CreateCarousel(ResultsGooglePlace res)
+    public void CreateCarousel(ResultsGooglePlace res, bool isLocal)
     {
-
-        if (locationList.Count == 0)
-            currentPlaceResult = res;
-
         foreach (LocationData location in res.results)
         {
             // :: enough item in the carousel
@@ -223,8 +230,10 @@ public class Carousel : MonoBehaviour {
         {
             GetNextPageGoogleNearbySearch.Invoke(res.next_page_token);
         }
+        else if (isLocal)
+            LoadAllLocationLocal();
         else
-            StartCoroutine(LoadAllLocations());
+            StartCoroutine(LoadAllRemoteLocation());
 
     }
 
@@ -246,7 +255,7 @@ public class Carousel : MonoBehaviour {
     /// <summary>
     /// Get The Photos from all the places in one point and show the photos after that
     /// </summary>
-    IEnumerator LoadAllLocations()
+    IEnumerator LoadAllRemoteLocation()
     {
         for (int i = 0; i < locationList.Count; i++)
         {
@@ -260,11 +269,28 @@ public class Carousel : MonoBehaviour {
         for (int i = 0; i < locationList.Count; i++)
         {
             string query = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + locationList[i].GetID() + "&fields=rating,formatted_phone_number,formatted_address";
-            yield return StartCoroutine(GoogleResultsReader.CallGoogleApi(query, locationList[i].SaveDetails));
+            yield return StartCoroutine(GoogleResultsReader.CallGoogleApi(query, locationList[i].SetDetails));
         }
 
     }
 
+
+    void LoadAllLocationLocal()
+    {
+        for (int i = 0; i < locationList.Count; i++)
+        {
+            locationList[i].LoadLocalPicture();
+        }
+
+        DisplayPhotos();
+        uiManager.SetCarouselActive();
+
+        for (int i = 0; i < locationList.Count; i++)
+        {
+            locationList[i].LoadLocalDetails();
+        }
+
+    }
 
     [ContextMenu("Displau Photos")]
     void Test()

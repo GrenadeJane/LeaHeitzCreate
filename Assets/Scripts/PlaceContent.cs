@@ -17,10 +17,8 @@ public class PlaceContent : MonoBehaviour, IObjectPooled
 
     #region Events 
     public static event Action<string, string, LocationDetails> OnPressed;
-
-    [Serializable] public class UnityEvent_PlaceInfo : UnityEvent<string,string> { }
-    [SerializeField] public UnityEvent_PlaceInfo SendPlaceInfo;
-
+    public static event Action<PlaceContent, Texture2D> SavePhoto;
+    public static event Action<PlaceContent, LocationDetails> SaveDetail;
 
     #endregion
 
@@ -53,15 +51,30 @@ public class PlaceContent : MonoBehaviour, IObjectPooled
         }
     }
 
+    public void LoadLocalPicture()
+    {
+        GetComponent<Renderer>().material.mainTexture = locationData.savedPhoto.texture;
+    }
+
     public void SetPicture(Texture2D tex)
     {
         GetComponent<Renderer>().material.mainTexture = tex;
+        SavePhoto.Invoke(this, tex);
     }
 
-    public void SaveDetails(string jsonResultDetail)
+
+    public void LoadLocalDetails()
+    {
+        locationDetails = locationData.details;
+        OpenInfos();
+    }
+
+
+    public void SetDetails(string jsonResultDetail)
     {
         locationDetails = JsonUtility.FromJson<ResultDetailGooglePlace>(jsonResultDetail).result;
         OpenInfos();
+        SaveDetail.Invoke(this, locationDetails);
     }
 
     public string GetFirstPhotoRef()

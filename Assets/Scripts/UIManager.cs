@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour {
 
+    #region Parameters
     [SerializeField] GameObject userInputContainer;
     [SerializeField] GameObject carouselContainer;
 
@@ -12,7 +13,11 @@ public class UIManager : MonoBehaviour {
     [SerializeField] Text titleInfoLabel;
     [SerializeField] Text textInfoLabel;
     [SerializeField] Text errorLabel;
+    #endregion
 
+    #region Runtime Datas 
+    bool infoPanelEnabled = false;
+    #endregion
 
     // Use this for initialization
     void Start ()
@@ -42,22 +47,32 @@ public class UIManager : MonoBehaviour {
         errorLabel.enabled = false;
     }
 
+    // display info but don't trigger the aniamtion
     public void ShowInfoPanel(string title, string text, LocationDetails details = null)
     {
         titleInfoLabel.text = title;
         textInfoLabel.text = text + '\n';
-        textInfoLabel.text += details.formatted_address + '\n';
-        textInfoLabel.text += details.formatted_phone_number + '\n';
-        textInfoLabel.text += details.website + '\n';
-        textInfoLabel.text += details.rating + '\n';
-        //textInfoLabel.text += details.types.ToString();
 
-        infoPanelAnimator.Play("InfoPanel");
+        if (details != null)
+        {
+            textInfoLabel.text += "Adress : \t" +  details.formatted_address + '\n';
+            textInfoLabel.text += "Phone Number : \t" + details.formatted_phone_number + '\n';
+            textInfoLabel.text += "Website : \t" + details.website + '\n';
+            textInfoLabel.text += "Rating : \t" + details.rating + '\n';
+        }
+
+        if (!infoPanelEnabled)
+            infoPanelAnimator.SetTrigger("Open");
+
+        infoPanelEnabled = true;
     }
 
     public void HideInfoPanel()
     {
-        infoPanelAnimator.SetTrigger("Close");
-
+        if (infoPanelEnabled)
+        {
+            infoPanelAnimator.SetTrigger("Close");
+            infoPanelEnabled = false;
+        }
     }
 }
