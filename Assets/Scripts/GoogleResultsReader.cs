@@ -79,7 +79,7 @@ public class GoogleResultsReader : MonoBehaviour
         }
 
         // no correct response - no internet connection - no saved result
-        if (res.status == "ZERO_RESULTS" || res == null )
+        if (res == null || res.status == "ZERO_RESULTS"  )
             DisplayErrorNoResults.Invoke();
         else
         {
